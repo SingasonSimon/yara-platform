@@ -1,0 +1,93 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ profile.business_name or profile.username }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 800px;">
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% if profile %}
+        <div class="profile-pic-wrapper">
+            {% if profile.profile_pic_filename %}
+                <img src="{{ url_for('static', filename='profile_pics/' + profile.profile_pic_filename) }}" alt="Profile Picture" style="width: 180px; height: 180px; border-radius: 50%; object-fit: cover; border: 4px solid var(--surface-color); box-shadow: 0 4px 12px var(--shadow-color);">
+            {% else %}
+                <img src="https://placehold.co/180x180/4a90e2/f0f0f0?text={{ profile.username[0]|upper }}" alt="Default Profile Picture" style="width: 180px; height: 180px; border-radius: 50%; border: 4px solid var(--surface-color); box-shadow: 0 4px 12px var(--shadow-color);">
+            {% endif %}
+        </div>
+        
+        <h2 style="font-size: 2.5rem; margin-bottom: 0.5rem; text-align: center;">{{ profile.business_name or 'No Business Name' }}</h2>
+        <p style="text-align: center; color: var(--text-secondary-color); margin-top: 0; margin-bottom: 2rem; font-size: 1.1rem;">
+            by {{ profile.username }}
+        </p>
+
+        <div class="profile-details">
+            <div class="detail-item">
+                <h4><i class="fas fa-info-circle"></i> About</h4>
+                <p>{{ profile.bio or 'No bio provided.' }}</p>
+            </div>
+            <div class="detail-item">
+                <h4><i class="fas fa-map-marker-alt"></i> Location</h4>
+                <p>{{ profile.location or 'No location provided.' }}</p>
+            </div>
+            <div class="detail-item">
+                <h4><i class="fas fa-phone"></i> Contact</h4>
+                <p>{{ profile.phone_number or 'No contact number provided.' }}</p>
+            </div>
+        </div>
+
+        {% if portfolio_gallery %}
+            <hr style="border-color: var(--border-color); margin: 3rem 0;">
+            <h3 style="text-align: center;">Portfolio</h3>
+            <div class="portfolio-grid">
+                {% for filename in portfolio_gallery %}
+                    <div class="portfolio-item">
+                        <a href="{{ url_for('static', filename='portfolio_uploads/' + filename) }}" target="_blank">
+                            <img src="{{ url_for('static', filename='portfolio_uploads/' + filename) }}" alt="Portfolio image">
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <hr style="border-color: var(--border-color); margin: 3rem 0;">
+
+        <h3 style="text-align: center;">Services Offered</h3>
+        {% if services %}
+            <ul style="list-style: none; padding: 0;">
+                {% for service in services %}
+                    <li class="service-list-item style="background-color: var(--bg-color); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong style="font-size: 1.1rem;">{{ service.service_name }}</strong>
+                                <div style="font-size: 0.9rem; color: var(--text-secondary-color); margin-top: 0.25rem;">
+                                    <span><i class="fas fa-clock"></i> {{ service.duration_minutes }} minutes</span>
+                                    <span style="margin-left: 1rem;">KES {{ "%.2f"|format(service.price) }}</span>
+                                </div>
+                            </div>
+                            <a href="{{ url_for('book_appointment', service_id=service.id) }}">
+                                <button type="button" class="btn btn--primary btn--small">Book Now</button>
+                            </a>
+                        </div>
+                        {% if service.description %}
+                            <p style="font-size: 0.95rem; margin-top: 0.75rem; border-top: 1px solid var(--border-color); padding-top: 0.75rem;">{{ service.description }}</p>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p style="text-align: center;">This professional has not listed any services yet.</p>
+        {% endif %}
+
+    {% else %}
+        <h2>Profile Not Found</h2>
+        <p>The user you are looking for does not have a profile or does not exist.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+{% block title %}Search by Image{% endblock %}
+{% block content %}
+<div class="container">
+    <h2>Search with an Image</h2>
+    <p style="color: var(--text-secondary-color);">Have a photo of a style you love? Upload it here and we'll find professionals who can make it a reality.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div style="background-color: var(--bg-color); padding: 1.5rem; border-radius: 8px; margin-top: 2rem;">
+        <form method="POST" action="{{ url_for('image_search') }}" enctype="multipart/form-data">
+            <div class="form-group">
+                <div class="file-upload-wrapper">
+                    <input type="file" id="inspiration_image" name="inspiration_image" accept="image/png, image/jpeg, image/jpg" required>
+                    <label for="inspiration_image" class="btn btn--secondary"><i class="fas fa-upload"></i> Choose Inspiration Photo...</label>
+                    <span id="file-chosen-text">No file chosen</span>
+                </div>
+            </div>
+            <button type="submit" class="btn btn--primary btn--full-width">Find Matches</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // This script gives user feedback on the file they selected
+    const fileInput = document.getElementById('inspiration_image');
+    const fileChosenText = document.getElementById('file-chosen-text');
+
+    fileInput.addEventListener('change', function(){
+        if (this.files.length > 0) {
+            fileChosenText.textContent = this.files[0].name;
+        } else {
+            fileChosenText.textContent = 'No file chosen';
+        }
+    });
+</script>
+{% endblock %}

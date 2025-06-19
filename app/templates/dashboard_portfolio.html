@@ -1,0 +1,78 @@
+{% extends "dashboard_layout.html" %}
+{% block title %}Manage Portfolio{% endblock %}
+{% block dashboard_content %}
+    <h2>Manage Portfolio</h2>
+    <p style="color: var(--text-secondary-color); margin-top: -1rem; margin-bottom: 2rem;">Upload images of your best work and add descriptive tags to help clients find you.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div style="background-color: var(--bg-color); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+        <form method="POST" action="{{ url_for('upload_portfolio') }}" enctype="multipart/form-data">
+            <h4>Upload New Images</h4>
+            <div class="form-group">
+                <label for="portfolio_images">Select one or more images (JPG, PNG)</label>
+                <div class="file-upload-wrapper">
+                    <input type="file" id="portfolio_images" name="portfolio_images" accept="image/png, image/jpeg, image/jpg" multiple required>
+                    <label for="portfolio_images" class="btn btn--secondary"><i class="fas fa-upload"></i> Choose Images...</label>
+                    <span id="file-chosen-text">No files chosen</span>
+                </div>
+                <small style="display: block; margin-top: 0.5rem; color: var(--text-secondary-color);">
+                    Tip: Hold Ctrl (or Command on Mac) to select multiple files.
+                </small>
+            </div>
+            <button type="submit" class="btn btn--primary">Upload Images</button>
+        </form>
+    </div>
+
+    <h4>Your Current Gallery</h4>
+    {% if portfolio_images %}
+        <div class="portfolio-grid">
+            {% for image in portfolio_images %}
+                <div class="portfolio-item-container">
+                    <div class="portfolio-item">
+                        <img src="{{ url_for('static', filename='portfolio_uploads/' + image.filename) }}" alt="Portfolio image">
+                        <form method="POST" action="{{ url_for('delete_portfolio_image') }}" onsubmit="return confirm('Are you sure you want to delete this image?');">
+                            <input type="hidden" name="filename" value="{{ image.filename }}">
+                            <button type="submit" class="delete-btn">&times;</button>
+                        </form>
+                    </div>
+                    <form method="POST" action="{{ url_for('update_tags') }}" class="tag-form">
+                        <input type="hidden" name="filename" value="{{ image.filename }}">
+                        <div class="form-group">
+                            <input type="text" name="tags" value="{{ image.tags or '' }}" placeholder="Add tags (e.g., box braids, long)...">
+                        </div>
+                        <button type="submit" class="btn btn--primary btn--small">Save Tags</button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>Your portfolio is empty. Upload some images to get started!</p>
+    {% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const fileInput = document.getElementById('portfolio_images');
+    const fileChosenText = document.getElementById('file-chosen-text');
+
+    fileInput.addEventListener('change', function(){
+        if (this.files.length > 0) {
+            if (this.files.length === 1) {
+                fileChosenText.textContent = this.files[0].name;
+            } else {
+                fileChosenText.textContent = `${this.files.length} files selected`;
+            }
+        } else {
+            fileChosenText.textContent = 'No files chosen';
+        }
+    });
+</script>
+{% endblock %}

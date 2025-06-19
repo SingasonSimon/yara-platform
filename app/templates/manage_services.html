@@ -1,0 +1,54 @@
+{% extends "dashboard_layout.html" %}
+
+{% set page_title = "Manage Services" %}
+
+{% block dashboard_content %}
+    <h2>Manage Your Services</h2>
+     {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('add_service') }}">
+        <h4>Add a New Service</h4>
+        <div class="form-group">
+            <label for="service_name">Service Name (e.g., Gel Manicure)</label>
+            <input type="text" id="service_name" name="service_name" required>
+        </div>
+        <div class="form-group">
+            <label for="price">Price (KES)</label>
+            <input type="number" id="price" name="price" step="0.01" required>
+        </div>
+        <div class="form-group">
+            <label for="duration_minutes">Duration (in minutes)</label>
+            <input type="number" id="duration_minutes" name="duration_minutes" required>
+        </div>
+        <div class="form-group">
+            <label for="service_description">Brief Description</label>
+            <textarea id="service_description" name="description" rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn btn--primary btn--full-width">Add Service</button>
+    </form>
+    
+    <h4 style="margin-top: 2rem;">Your Current Services</h4>
+    {% if services %}
+        <ul style="list-style: none; padding: 0;">
+            {% for service in services %}
+                <li class="appointment-card">
+                    <div>
+                        <strong>{{ service.service_name }}</strong><br>
+                        <small class="meta-text">KES {{ "%.2f"|format(service.price) }} - {{ service.duration_minutes }} mins</small>
+                    </div>
+                    <form method="POST" action="{{ url_for('delete_service', service_id=service.id) }}" onsubmit="return confirm('Are you sure you want to delete this service?');">
+                        <button type="submit" class="btn btn--danger btn--small">Delete</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You have not added any services yet.</p>
+    {% endif %}
+{% endblock %}

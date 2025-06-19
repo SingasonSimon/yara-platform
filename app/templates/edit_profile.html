@@ -1,0 +1,121 @@
+{% extends "dashboard_layout.html" %}
+
+{% set page_title = "Edit Profile" %}
+
+{% block dashboard_content %}
+    <h2>Edit Your Profile</h2>
+    <p style="color: var(--text-secondary-color); margin-top: -1rem; margin-bottom: 2rem;">This information is visible to clients on your public profile.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('edit_profile') }}" enctype="multipart/form-data">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            {% if profile and profile.profile_pic_filename %}
+                <img src="{{ url_for('static', filename='profile_pics/' + profile.profile_pic_filename) }}" alt="Profile Picture" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover;">
+            {% else %}
+                <img src="https://placehold.co/150x150/4a90e2/f0f0f0?text=No+Image" alt="Default Profile Picture" style="width: 150px; height: 150px; border-radius: 50%;">
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label><i class="fas fa-camera"></i> Update Profile Picture</label>
+            <div class="file-upload-wrapper">
+                <input type="file" id="profile_pic" name="profile_pic" accept="image/png, image/jpeg, image/jpg">
+                <label for="profile_pic" class="btn btn--secondary"><i class="fas fa-upload"></i> Choose Image...</label>
+                <span id="file-chosen-text">No file chosen</span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="business_name"><i class="fas fa-store"></i>Business Name</label>
+            <input type="text" id="business_name" name="business_name" value="{{ profile.business_name or '' }}">
+        </div>
+        <div class="form-group">
+            <label for="phone_number"><i class="fas fa-phone"></i>Contact Phone</label>
+            <input type="tel" id="phone_number" name="phone_number" value="{{ profile.phone_number or '' }}">
+        </div>
+        <div class="form-group">
+            <label for="location"><i class="fas fa-map-marker-alt"></i>Your Location</label>
+            <input type="text" id="location" name="location" value="{{ profile.location or '' }}">
+        </div>
+        <div class="form-group">
+            <label for="bio"><i class="fas fa-info-circle"></i>Bio / Description</label>
+            <textarea id="bio" name="bio" rows="5">{{ profile.bio or '' }}</textarea>
+        </div>
+        
+        <hr style="border-color: var(--border-color); margin: 3rem 0;">
+
+        <h4><i class="fas fa-calendar-alt"></i> Set Your Weekly Availability</h4>
+        <p style="color: var(--text-secondary-color); font-size: 0.9rem;">Set your working hours for each day. Uncheck a day to mark it as unavailable.</p>
+        
+        {% set days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] %}
+        {% for day in days %}
+        <div class="availability-row {% if profile and profile[day+'_start'] %}is-checked{% endif %}">
+            <div class="checkbox-wrapper">
+                <input type="checkbox" class="custom-checkbox" id="{{ day }}_available" name="{{ day }}_available" value="true" {% if profile and profile[day+'_start'] %}checked{% endif %}>
+                <label for="{{ day }}_available" class="checkbox-label">
+                    <span class="checkmark"></span>
+                    {{ day }}
+                </label>
+            </div>
+            <div class="form-group" style="margin: 0;">
+                <label for="{{ day }}_start">Start Time</label>
+                <input type="time" id="{{ day }}_start" name="{{ day }}_start" value="{{ profile[day+'_start']|string|replace('00:00', '') if profile and profile[day+'_start'] else '' }}">
+            </div>
+            <div class="form-group" style="margin: 0;">
+                <label for="{{ day }}_end">End Time</label>
+                <input type="time" id="{{ day }}_end" name="{{ day }}_end" value="{{ profile[day+'_end']|string|replace('00:00', '') if profile and profile[day+'_end'] else '' }}">
+            </div>
+        </div>
+        {% endfor %}
+
+        <button type="submit" class="btn btn--primary btn--full-width" style="margin-top: 2rem;">Save All Changes</button>
+    </form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Script for the profile picture file name
+    const profilePicInput = document.getElementById('profile_pic');
+    const fileChosenText = document.getElementById('file-chosen-text');
+
+    if (profilePicInput) {
+        profilePicInput.addEventListener('change', function(){
+            if (this.files.length > 0) {
+                fileChosenText.textContent = this.files[0].name;
+            } else {
+                fileChosenText.textContent = 'No file chosen';
+            }
+        });
+    }
+
+    // --- CORRECTED SCRIPT WITH VALIDATION ---
+    document.querySelectorAll('.availability-row').forEach(row => {
+        const checkbox = row.querySelector('input[type="checkbox"]');
+        const timeInputs = row.querySelectorAll('input[type="time"]');
+
+        const toggleTimeInputs = () => {
+            const isChecked = checkbox.checked;
+            row.classList.toggle('is-checked', isChecked);
+            
+            timeInputs.forEach(input => {
+                input.disabled = !isChecked;
+                // Add or remove the 'required' attribute
+                if (isChecked) {
+                    input.setAttribute('required', 'required');
+                } else {
+                    input.removeAttribute('required');
+                }
+            });
+        };
+        checkbox.addEventListener('change', toggleTimeInputs);
+        toggleTimeInputs(); // Run on page load
+    });
+</script>
+{% endblock %}

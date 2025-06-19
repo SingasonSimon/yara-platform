@@ -1,0 +1,94 @@
+{% extends "dashboard_layout.html" %}
+
+{% set page_title = "Manage Appointments" %}
+
+{% block dashboard_content %}
+    <h2>Manage Appointments</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <h4><i class="fas fa-clock"></i> Pending Requests</h4>
+    {% if pending_appointments %}
+        <ul style="list-style: none; padding: 0;">
+            {% for appt in pending_appointments %}
+                <li class="appointment-card">
+                    <div>
+                        <strong>{{ appt.service_name }}</strong> for {{ appt.client_username }}
+                        <small class="meta-text" style="display: block;">
+                            On {{ appt.appointment_datetime.strftime('%A, %b %d, %Y at %I:%M %p') }}
+                        </small>
+                    </div>
+                    <div style="margin-top: 1rem; display: flex; gap: 1rem;">
+                        <form method="POST" action="{{ url_for('update_appointment_status', appointment_id=appt.id, new_status='confirmed') }}">
+                            <button type="submit" class="btn btn--success btn--small">Confirm</button>
+                        </form>
+                        <form method="POST" action="{{ url_for('update_appointment_status', appointment_id=appt.id, new_status='cancelled') }}">
+                            <button type="submit" class="btn btn--danger btn--small">Cancel</button>
+                        </form>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You have no pending appointment requests.</p>
+    {% endif %}
+
+    <hr style="border-color: var(--border-color); margin: 3rem 0;">
+
+    <h4><i class="fas fa-check-circle"></i> Confirmed & Upcoming Appointments</h4>
+    {% if confirmed_appointments %}
+        <ul style="list-style: none; padding: 0;">
+            {% for appt in confirmed_appointments %}
+                <li class="appointment-card">
+                    <div>
+                        <div><strong>{{ appt.service_name }}</strong> for {{ appt.client_username }}</div>
+                        <small class="meta-text">
+                            On {{ appt.appointment_datetime.strftime('%A, %b %d, %Y at %I:%M %p') }}
+                        </small>
+                    </div>
+                    <div>
+                        {% if appt.appointment_datetime < now and appt.payment_status == 'paid' %}
+                            <form method="POST" action="{{ url_for('update_appointment_status', appointment_id=appt.id, new_status='completed') }}">
+                                <button type="submit" class="btn btn--primary btn--small">Mark as Completed</button>
+                            </form>
+                        {% elif appt.payment_status == 'paid' %}
+                            <span class="status-badge paid"><i class="fas fa-check"></i> Paid</span>
+                        {% else %}
+                             <span class="status-badge pending">Awaiting Payment</span>
+                        {% endif %}
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You have no confirmed appointments.</p>
+    {% endif %}
+
+    <hr style="border-color: var(--border-color); margin: 3rem 0;">
+    
+    <h4><i class="fas fa-history"></i> Appointment History</h4>
+    {% if history_appointments %}
+        <ul style="list-style: none; padding: 0;">
+            {% for appt in history_appointments %}
+                <li class="appointment-card">
+                    <div>
+                        <div><strong>{{ appt.service_name }}</strong> for {{ appt.client_username }}</div>
+                        <small class="meta-text">
+                            On {{ appt.appointment_datetime.strftime('%A, %b %d, %Y at %I:%M %p') }}
+                        </small>
+                    </div>
+                    <div class="status-badge {{ appt.status }}">{{ appt.status|capitalize }}</div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You have no past appointments.</p>
+    {% endif %}
+
+{% endblock %}

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %} - Yara</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://npmcdn.com/flatpickr/dist/themes/dark.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="site-layout {{ 'dark-theme' if session.get('theme') == 'dark' }}">
+
+    <header class="navbar">
+        <div class="navbar-container">
+            <a href="{{ url_for('home') }}" class="navbar-brand">Yara</a>
+            
+            <nav class="navbar-menu" id="navbar-menu">
+                {% if session.loggedin %}
+                    {% if session.user_type == 'client' %}
+                        <a href="{{ url_for('dashboard') }}" class="nav-link">Dashboard</a>
+                        <a href="{{ url_for('my_appointments') }}" class="nav-link">Appointments</a>
+                    {% else %}
+                        <a href="{{ url_for('dashboard') }}" class="nav-link">Professional Dashboard</a>
+                    {% endif %}
+                    <a href="{{ url_for('logout') }}" class="nav-link">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="nav-link">Login</a>
+                    <a href="{{ url_for('register') }}" class="nav-link">Register</a>
+                {% endif %}
+                <button id="theme-switcher" class="theme-switcher-btn"><i class="fas fa-moon"></i></button>
+            </nav>
+
+            <button id="mobile-menu-toggle" class="mobile-menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <footer class="site-footer">
+    <p>&copy; 2025 Yara Beauty. All Rights Reserved.</p>
+    <p><a href="{{ url_for('contact') }}">Contact Us</a></p> 
+</footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- CACHE ELEMENTS ---
+            const body = document.body;
+            const currentYearSpan = document.getElementById('current-year');
+            const themeSwitcher = document.getElementById('theme-switcher');
+            const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+            const navbarMenu = document.getElementById('navbar-menu');
+
+            // --- SET CURRENT YEAR ---
+            if (currentYearSpan) { currentYearSpan.textContent = new Date().getFullYear(); }
+
+            // --- THEME SWITCHER LOGIC ---
+            if (themeSwitcher) {
+                const themeIcon = themeSwitcher.querySelector('i');
+                const setTheme = (theme) => {
+                    if (theme === 'dark') { body.classList.add('dark-theme'); themeIcon.classList.remove('fa-moon'); themeIcon.classList.add('fa-sun'); localStorage.setItem('theme', 'dark'); } 
+                    else { body.classList.remove('dark-theme'); themeIcon.classList.remove('fa-sun'); themeIcon.classList.add('fa-moon'); localStorage.setItem('theme', 'light'); }
+                };
+                themeSwitcher.addEventListener('click', (e) => { e.preventDefault(); const isDark = body.classList.contains('dark-theme'); setTheme(isDark ? 'light' : 'dark'); });
+                const savedTheme = localStorage.getItem('theme') || 'dark';
+                setTheme(savedTheme);
+            }
+
+            // --- MOBILE NAVIGATION LOGIC ---
+            if (mobileMenuToggle && navbarMenu) {
+                const icon = mobileMenuToggle.querySelector('i');
+                const closeMenu = () => {
+                    navbarMenu.classList.remove('is-open');
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                };
+
+                mobileMenuToggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    navbarMenu.classList.toggle('is-open');
+                    icon.classList.toggle('fa-bars');
+                    icon.classList.toggle('fa-times');
+                });
+
+                // NEW: Close on outside click
+                document.addEventListener('click', (e) => {
+                    if (navbarMenu.classList.contains('is-open') && !navbarMenu.contains(e.target) && e.target !== mobileMenuToggle) {
+                        closeMenu();
+                    }
+                });
+
+                // NEW: Close on scroll
+                window.addEventListener('scroll', () => {
+                    if (navbarMenu.classList.contains('is-open')) {
+                        closeMenu();
+                    }
+                });
+            }
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

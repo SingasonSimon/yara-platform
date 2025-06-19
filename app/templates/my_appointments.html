@@ -1,0 +1,75 @@
+{% extends "layout.html" %}
+{% block title %}My Appointments{% endblock %}
+{% block content %}
+<div class="container">
+    <h2>My Appointments</h2>
+    <p style="color: var(--text-secondary-color);">Here is a list of all your requested and confirmed appointments.</p>
+    
+    <h4><i class="fas fa-clock"></i> Pending Confirmation</h4>
+    {% if pending %}
+        {% for appt in pending %}
+        <div class="appointment-card">
+            <div><strong>{{ appt.service_name }}</strong></div>
+            <div>with {{ appt.business_name or appt.professional_username }}</div>
+            <small class="meta-text">Requested for: {{ appt.appointment_datetime.strftime('%A, %b %d, %Y at %I:%M %p') }}</small>
+            <div class="status-badge pending">Status: Pending</div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>You have no pending appointment requests.</p>
+    {% endif %}
+
+    <hr style="border-color: var(--border-color); margin: 2rem 0;">
+
+    <h4><i class="fas fa-check-circle"></i> Upcoming & Confirmed</h4>
+     {% if confirmed %}
+        {% for appt in confirmed %}
+        <div class="appointment-card">
+            <div>
+                <div><strong>{{ appt.service_name }}</strong></div>
+                <div>with {{ appt.business_name or appt.professional_username }}</div>
+                <small class="meta-text">Scheduled for: {{ appt.appointment_datetime.strftime('%A, %b %d, %Y at %I:%M %p') }}</small>
+            </div>
+            <div>
+                {% if appt.payment_status == 'unpaid' %}
+                    <a href="{{ url_for('pay_for_appointment', appointment_id=appt.id) }}">
+                        <button type="button" class="btn btn--success btn--small">Pay Now</button>
+                    </a>
+                {% else %}
+                    <span class="status-badge paid"><i class="fas fa-check"></i> Paid</span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>You have no upcoming appointments.</p>
+    {% endif %}
+    
+    <hr style="border-color: var(--border-color); margin: 2rem 0;">
+
+    <h4><i class="fas fa-history"></i> Appointment History</h4>
+     {% if history %}
+        {% for appt in history %}
+        <div class="appointment-card">
+            <div>
+                <div><strong>{{ appt.service_name }}</strong></div>
+                <div>with {{ appt.business_name or appt.professional_username }}</div>
+                <small class="meta-text">Date: {{ appt.appointment_datetime.strftime('%A, %b %d, %Y at %I:%M %p') }}</small>
+                <div class="status-badge {{ appt.status }}">{{ appt.status|capitalize }}</div>
+            </div>
+            <div>
+                {% if appt.status == 'completed' and not appt.review_id %}
+                    <a href="{{ url_for('leave_review', appointment_id=appt.id) }}">
+                        <button type="button" class="btn btn--primary btn--small">Leave a Review</button>
+                    </a>
+                {% elif appt.review_id %}
+                    <span class="meta-text">Reviewed</span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>You have no past appointments.</p>
+    {% endif %}
+</div>
+{% endblock %}

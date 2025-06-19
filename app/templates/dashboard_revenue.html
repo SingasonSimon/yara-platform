@@ -1,0 +1,92 @@
+{% extends "dashboard_layout.html" %}
+{% set page_title = "Revenue Dashboard" %}
+{% block dashboard_content %}
+    <h2>Revenue Dashboard</h2>
+
+    <div style="display: flex; gap: 2rem; margin-bottom: 2rem;">
+        <div style="background-color: var(--bg-color); padding: 1.5rem; border-radius: 8px; flex-grow: 1;">
+            <div style="font-size: 2.5rem; font-weight: 600; color: var(--primary-color);">KES {{ "%.2f"|format(stats.total_revenue or 0) }}</div>
+            <div style="color: var(--text-secondary-color);">Total Revenue</div>
+        </div>
+        <div style="background-color: var(--bg-color); padding: 1.5rem; border-radius: 8px; flex-grow: 1;">
+            <div style="font-size: 2.5rem; font-weight: 600;">{{ stats.total_payments }}</div>
+            <div style="color: var(--text-secondary-color);">Paid Appointments</div>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <h4 style="margin-top: 0; margin-bottom: 1rem;">Revenue Over Time</h4>
+        <canvas id="revenueChart"></canvas>
+    </div>
+
+    <h4>Payment History</h4>
+    <div class="revenue-table-wrapper">
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="border-bottom: 1px solid var(--border-color); text-align: left;">
+                <th style="padding: 0.8rem;">Date</th>
+                <th style="padding: 0.8rem;">Client</th>
+                <th style="padding: 0.8rem;">Service</th>
+                <th style="padding: 0.8rem;">Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for payment in payments %}
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 0.8rem;">{{ payment.payment_date.strftime('%b %d, %Y') }}</td>
+                    <td style="padding: 0.8rem;">{{ payment.client_username }}</td>
+                    <td style="padding: 0.8rem;">{{ payment.service_name }}</td>
+                    <td style="padding: 0.8rem;">KES {{ "%.2f"|format(payment.amount_paid) }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="4" style="padding: 1rem; text-align: center;">No payments have been received yet.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const chartLabels = {{ chart_data.labels|tojson }};
+        const chartValues = {{ chart_data.data|tojson }};
+        const canvasElement = document.getElementById('revenueChart');
+
+        if (canvasElement) {
+            const ctx = canvasElement.getContext('2d');
+            const revenueChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: 'Revenue (KES)',
+                        data: chartValues,
+                        backgroundColor: 'rgba(234, 76, 137, 0.2)',
+                        borderColor: 'rgba(234, 76, 137, 1)', 
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, 
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <h2>Welcome to Yara, {{ session.username }}!</h2>
+    <p style="color: var(--text-secondary-color); text-align: center; max-width: 600px; margin: -1rem auto 2rem auto;">
+        Your personalized guide to the best beauty professionals in Kenya. Find the exact style you want and book with confidence.
+    </p>
+    <form action="{{ url_for('search') }}" method="GET" class="client-dashboard-search">
+        <div class="form-group">
+            <div style="display: flex; gap: 1rem;">
+                <input type="search" id="search_query" name="q" placeholder="Search by Name, Location, or Service..." style="flex-grow: 1;">
+                <button type="submit" class="btn btn--primary">Search</button>
+            </div>
+        </div>
+    </form>
+    <div style="text-align: center; margin: 1.5rem 0;">
+        <p style="color: var(--text-secondary-color); margin-bottom: 0.5rem;">OR</p>
+        <a href="{{ url_for('image_search') }}">
+             <button type="button" class="btn btn--primary"><i class="fas fa-camera-retro"></i> Search with an Image</button>
+        </a>
+    </div>
+    
+    <hr style="border-color: var(--border-color); margin: 3rem 0;">
+    
+    <div class="info-section">
+        <h3>How It Works</h3>
+        <div class="features-grid">
+            <div class="feature-item">
+                <i class="fas fa-search"></i>
+                <h4>1. Discover</h4>
+                <p>Search for top-rated professionals near you or by the specific service you need.</p>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-calendar-check"></i>
+                <h4>2. Book</h4>
+                <p>View their real-time availability and book a time slot that works for you instantly.</p>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-star"></i>
+                <h4>3. Review</h4>
+                <p>After your appointment, share your experience to help guide the community.</p>
+            </div>
+        </div>
+    </div>
+
+    {% if featured %}
+    <div style="margin-top: 3rem;">
+        <h3 style="text-align: center;">Featured Professionals</h3>
+        <div class="results-grid">
+            {% for professional in featured %}
+                <a href="{{ url_for('view_profile', username=professional.username) }}" class="professional-card">
+                    <div class="card-image">
+                        <img src="{{ url_for('static', filename='profile_pics/' + professional.profile_pic_filename) }}" alt="{{ professional.business_name }}">
+                    </div>
+                    <div class="card-content">
+                        <h3>{{ professional.business_name or professional.username }}</h3>
+                        <p><i class="fas fa-map-marker-alt"></i> {{ professional.location or 'Location not specified' }}</p>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

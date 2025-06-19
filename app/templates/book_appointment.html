@@ -1,0 +1,120 @@
+{% extends "layout.html" %}
+{% block title %}Book Appointment{% endblock %}
+{% block content %}
+<div class="container">
+    <h2>Book an Appointment</h2>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <p>You are booking:</p>
+    <div style="background-color: var(--bg-color); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+        <h3 style="margin-top:0;">{{ service.service_name }}</h3>
+        <p>with <strong>{{ professional.business_name or professional.username }}</strong></p>
+    </div>
+
+    <form method="POST" action="{{ url_for('book_appointment', service_id=service.id) }}">
+        <h4>1. Select a Date</h4>
+        <div class="form-group">
+            <input type="text" id="appointment_date" name="appointment_date" placeholder="Click to select a date..." required>
+        </div>
+
+        <h4>2. Select an Available Time</h4>
+        <div id="time-slots-container" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem;"></div>
+        <div id="availability-message" style="display: none; color: var(--text-secondary-color);"></div>
+        
+        <input type="hidden" id="selected_time" name="appointment_time" value="">
+
+        <button type="submit" id="submit-btn" class="btn btn--primary btn--full-width" disabled>Request Appointment</button>
+    </form>
+</div>
+
+<style>
+    /* Add this style to make the Flatpickr calendar match our theme */
+    .flatpickr-calendar {
+        background-color: var(--surface-color);
+        border: 1px solid var(--border-color);
+    }
+    .flatpickr-day {
+        color: var(--text-color);
+    }
+    .flatpickr-day:hover {
+        background-color: var(--bg-color);
+    }
+    .flatpickr-day.selected {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+    .flatpickr-weekday, .flatpickr-monthDropdown-month, .numInput, .cur-month {
+        color: var(--text-color);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dateInput = document.getElementById('appointment_date');
+        const slotsContainer = document.getElementById('time-slots-container');
+        const hiddenTimeInput = document.getElementById('selected_time');
+        const messageDiv = document.getElementById('availability-message');
+        const submitBtn = document.getElementById('submit-btn');
+
+        // --- NEW: Initialize Flatpickr ---
+        const fp = flatpickr("#appointment_date", {
+            altInput: true,
+            altFormat: "F j, Y", // How the date is displayed to the user
+            dateFormat: "Y-m-d", // How the date is sent to the server
+            minDate: "today",
+            theme: document.body.classList.contains('dark-theme') ? "dark" : "light",
+            // This function runs every time the user picks a date
+            onChange: function(selectedDates, dateStr, instance) {
+                fetchAndDisplaySlots();
+            },
+        });
+
+        async function fetchAndDisplaySlots() {
+            const selectedDate = dateInput.value;
+            if (!selectedDate) return;
+
+            slotsContainer.innerHTML = '';
+            hiddenTimeInput.value = '';
+            submitBtn.disabled = true;
+            messageDiv.textContent = 'Loading available times...';
+            messageDiv.style.display = 'block';
+
+            try {
+                const response = await fetch(`/api/available_slots?date=${selectedDate}&service_id={{ service.id }}`);
+                const slots = await response.json();
+
+                if (slots.length > 0) {
+                    messageDiv.style.display = 'none';
+                    slots.forEach(slot => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'btn btn--secondary'; // Use our button styles
+                        btn.style.margin = '0.25rem';
+                        btn.textContent = slot;
+                        slotsContainer.appendChild(btn);
+
+                        btn.addEventListener('click', () => {
+                            document.querySelectorAll('#time-slots-container .btn').forEach(b => b.classList.remove('btn--primary'));
+                            btn.classList.add('btn--primary');
+                            hiddenTimeInput.value = btn.textContent;
+                            submitBtn.disabled = false;
+                        });
+                    });
+                } else {
+                    messageDiv.textContent = 'Sorry, no available time slots on this day.';
+                }
+            } catch (error) {
+                messageDiv.textContent = 'Could not fetch available times. Please try again.';
+                console.error('Error fetching slots:', error);
+            }
+        }
+    });
+</script>
+{% endblock %}

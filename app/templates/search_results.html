@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block title %}Search Results{% endblock %}
+{% block content %}
+<div class="container">
+    <h2>Search Results for: <span style="color: var(--primary-color);">'{{ query }}'</span></h2>
+
+    {% if results %}
+        <p style="color: var(--text-secondary-color);">Found {{ results|length }} professional(s) matching your search.</p>
+        <div class="results-grid">
+            {% for professional in results %}
+                <a href="{{ url_for('view_profile', username=professional.username) }}" class="professional-card">
+                    <div class="card-image">
+                        {% if professional.profile_pic_filename %}
+                            <img src="{{ url_for('static', filename='profile_pics/' + professional.profile_pic_filename) }}" alt="{{ professional.business_name }}">
+                        {% else %}
+                            <img src="https://placehold.co/300x200/4a90e2/f0f0f0?text={{ professional.username[0]|upper }}" alt="Default Image">
+                        {% endif %}
+                    </div>
+                    <div class="card-content">
+                        <h3>{{ professional.business_name or professional.username }}</h3>
+                        <p><i class="fas fa-map-marker-alt"></i> {{ professional.location or 'Location not specified' }}</p>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>Sorry, no professionals found matching your search term. Try a different search.</p>
+    {% endif %}
+    <p style="text-align: center; margin-top: 2rem;">
+        <a href="{{ url_for('dashboard') }}" style="color: var(--primary-color);">Back to Dashboard</a>
+    </p>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "dashboard_layout.html" %}
+{% set page_title = "My Reviews" %}
+{% block dashboard_content %}
+    <h2>My Reviews</h2>
+    
+    <div style="display: flex; gap: 2rem; margin-bottom: 2rem; background-color: var(--bg-color); padding: 1.5rem; border-radius: 8px;">
+        <div>
+            <div style="font-size: 2.5rem; font-weight: 600; color: var(--primary-color);">{{ '%.1f'|format(stats.average_rating or 0) }}</div>
+            <div style="color: var(--text-secondary-color);">Average Rating</div>
+        </div>
+        <div>
+            <div style="font-size: 2.5rem; font-weight: 600;">{{ stats.total_reviews }}</div>
+            <div style="color: var(--text-secondary-color);">Total Reviews</div>
+        </div>
+    </div>
+
+    {% if reviews %}
+        {% for review in reviews %}
+            <div class="review-card">
+                <div class="review-header">
+                    <span class="review-stars">
+                        {% for i in range(review.rating) %}★{% endfor %}<span style="color: var(--border-color);">{% for i in range(5 - review.rating) %}★{% endfor %}</span>
+                    </span>
+                    <span class="review-meta">by {{ review.client_username }} for {{ review.service_name }}</span>
+                </div>
+                <div class="review-body">
+                    <p>{{ review.review_text or 'No comment provided.' }}</p>
+                    <small>{{ review.created_at.strftime('%b %d, %Y') }}</small>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>You have not received any reviews yet.</p>
+    {% endif %}
+
+{% endblock %}

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ page_title | default('Dashboard') }} - Yara</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://npmcdn.com/flatpickr/dist/themes/dark.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="class="dashboard-body {{ 'dark-theme' if session.get('theme') == 'dark' }}"">
+
+    <header class="mobile-top-bar">
+        <button id="sidebar-toggle" class="mobile-menu-toggle"><i class="fas fa-bars"></i></button>
+        <h3 class="mobile-dashboard-title">{{ page_title | default('Dashboard') }}</h3>
+    </header>
+
+    <aside class="dashboard-sidebar" id="dashboard-sidebar">
+        <h3>{{ session.username }}</h3>
+        <ul class="sidebar-nav main-nav">
+            <li><a href="{{ url_for('edit_profile') }}" class="nav-link {{ 'active' if 'edit_profile' in request.path else '' }}"><i class="fas fa-user-edit"></i> Edit Profile</a></li>
+            <li><a href="{{ url_for('manage_portfolio') }}" class="nav-link {{ 'active' if 'manage_portfolio' in request.path else '' }}"><i class="fas fa-images"></i> Portfolio</a></li>
+            <li><a href="{{ url_for('manage_services') }}" class="nav-link {{ 'active' if 'manage_services' in request.path else '' }}"><i class="fas fa-cut"></i> Manage Services</a></li>
+            <li><a href="{{ url_for('manage_appointments') }}" class="nav-link {{ 'active' if 'manage_appointments' in request.path else '' }}"><i class="fas fa-calendar-alt"></i> Manage Appointments</a></li>
+            <li><a href="{{ url_for('revenue_dashboard') }}" class="nav-link {{ 'active' if 'revenue' in request.path else '' }}"><i class="fas fa-chart-line"></i> Revenue</a></li>
+            <li><a href="{{ url_for('my_reviews') }}" class="nav-link {{ 'active' if 'my_reviews' in request.path else '' }}"><i class="fas fa-star"></i> My Reviews</a></li>
+            <li><a href="{{ url_for('view_profile', username=session.username) }}" class="nav-link" target="_blank"><i class="fas fa-eye"></i> View Public Profile</a></li>
+        </ul>
+        <ul class="sidebar-nav">
+            <li><a href="#" id="theme-switcher" class="nav-link"><i class="fas fa-moon"></i><span style="margin-left: 1rem;">Change Theme</span></a></li>
+            <li><a href="{{ url_for('logout') }}" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+        </ul>
+    </aside>
+
+    <main class="dashboard-content">
+        {% block dashboard_content %}{% endblock %}
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const sidebar = document.getElementById('dashboard-sidebar');
+            if (sidebarToggle && sidebar) {
+                const icon = sidebarToggle.querySelector('i');
+                const closeMenu = () => {
+                    sidebar.classList.remove('is-open');
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                };
+                sidebarToggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sidebar.classList.toggle('is-open');
+                    icon.classList.toggle('fa-bars');
+                    icon.classList.toggle('fa-times');
+                });
+                document.querySelector('.dashboard-content').addEventListener('click', () => {
+                    if (sidebar.classList.contains('is-open')) {
+                        closeMenu();
+                    }
+                });
+            }
+
+            const themeSwitcher = document.getElementById('theme-switcher');
+            const body = document.body;
+            if (themeSwitcher) {
+                const themeIcon = themeSwitcher.querySelector('i');
+                const setTheme = (theme) => {
+                    if (theme === 'dark') { body.classList.add('dark-theme'); themeIcon.classList.remove('fa-moon'); themeIcon.classList.add('fa-sun'); localStorage.setItem('theme', 'dark'); } 
+                    else { body.classList.remove('dark-theme'); themeIcon.classList.remove('fa-sun'); themeIcon.classList.add('fa-moon'); localStorage.setItem('theme', 'light'); }
+                };
+                themeSwitcher.addEventListener('click', (e) => { e.preventDefault(); const isDark = body.classList.contains('dark-theme'); setTheme(isDark ? 'light' : 'dark'); });
+                const savedTheme = localStorage.getItem('theme') || 'dark';
+                setTheme(savedTheme);
+            }
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
