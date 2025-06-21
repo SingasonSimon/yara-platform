@@ -129,6 +129,16 @@ input:focus, select:focus, textarea:focus {
     padding: 0.6rem 1.2rem;
     font-size: 0.9rem;
 }
+.btn--secondary {
+    background-color: transparent;
+    color: var(--text-color); /* BONUS FIX: Use variable for theme support */
+    border-color: var(--primary-color);
+}
+.btn--secondary:hover {
+    background-color: var(--primary-hover-color);
+    color: white;
+}
+
 .btn--primary {
     background-color: var(--primary-color);
     color: white;
@@ -137,15 +147,6 @@ input:focus, select:focus, textarea:focus {
 .btn--primary:hover {
     background-color: var(--primary-hover-color);
     border-color: var(--primary-hover-color);
-}
-.btn--secondary {
-    background-color: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
-}
-.btn--secondary:not(.btn--primary):hover {
-    background-color: var(--primary-color);
-    color: white;
 }
 .btn--success {
     background-color: var(--success-color);
