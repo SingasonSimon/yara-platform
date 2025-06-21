@@ -35,25 +35,35 @@
 </div>
 
 <style>
-    
+/*
+========================================
+V2: Robust & Polished Flatpickr Style
+========================================
+*/
+
 /* Main calendar container */
 .flatpickr-calendar {
-    background-color: var(--surface-color);
+    background: var(--surface-color);
     border: 1px solid var(--border-color);
-    border-radius: 12px; /* Consistent with your .container */
-    box-shadow: 0 8px 25px var(--shadow-color);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px var(--shadow-color);
     backdrop-filter: blur(10px);
-    width: 320px; /* A slightly wider, more modern feel */
+    width: 340px; 
+    padding: 1rem;
+    font-family: 'Poppins', sans-serif;
 }
 
-/* Header with month and arrows */
+/* Header (Month + Arrows) */
 .flatpickr-months {
-    background-color: var(--bg-color);
-    padding: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+.flatpickr-current-month {
+    color: var(--text-color);
+    font-size: 1.1rem;
+    font-weight: 600;
 }
 .flatpickr-months .flatpickr-prev-month,
 .flatpickr-months .flatpickr-next-month {
-    /* Style the navigation arrows */
     fill: var(--text-secondary-color);
     transition: fill 0.2s;
 }
@@ -61,69 +71,83 @@
 .flatpickr-months .flatpickr-next-month:hover {
     fill: var(--primary-color);
 }
-.flatpickr-current-month {
-    color: var(--text-color);
-    font-size: 1.1rem;
-    font-weight: 600;
-}
+
 
 /* Weekday headers (Sun, Mon, Tue...) */
+.flatpickr-weekdays {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 0.5rem;
+    height: 38px;
+}
 .flatpickr-weekday {
-    color: var(--text-secondary-color);
+    flex: 1;
+    text-align: center;
+    line-height: 38px;
+    font-size: 0.7rem;
     font-weight: 500;
-    font-size: 0.8rem;
+    color: var(--text-secondary-color);
+    text-transform: uppercase;
 }
 
-/* Individual day cells */
+/* Main container for all the day numbers */
+.dayContainer {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+/* --- KEY FIXES FOR INDIVIDUAL DAY CELLS --- */
 .flatpickr-day {
+    /* Sizing & Layout */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    margin: 2px;
+    padding: 0;
+
+    /* Appearance */
     color: var(--text-color);
-    border: 2px solid transparent; /* Reserve space for border */
-    border-radius: 8px; /* Rounded day cells */
-    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
-}
-.flatpickr-day:hover {
-    background-color: var(--bg-color);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 50%; /* Circular shape for a modern look */
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-/* "Today's" date style */
+/* Hover state for non-selected days */
+.flatpickr-day:hover {
+    background: var(--bg-color);
+}
+
+/* 'Today's' date style */
 .flatpickr-day.today {
     border-color: var(--primary-color);
-    color: var(--primary-color);
 }
 .flatpickr-day.today:hover {
-    background-color: var(--primary-color);
+    background: var(--primary-color);
+    color: #fff;
+}
+
+/* 'Selected' date style (most important) */
+.flatpickr-day.selected,
+.flatpickr-day.selected:hover {
+    background: var(--primary-color);
     border-color: var(--primary-color);
     color: #fff;
 }
 
-/* "Selected" date style */
-.flatpickr-day.selected,
-.flatpickr-day.selected:hover,
-.flatpickr-day.today.selected {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-    color: #fff; /* Ensure text is white */
-}
-
-/* Disabled/out-of-month days */
-.flatpickr-day.disabled,
-.flatpickr-day.flatpickr-disabled {
+/* Disabled & Out-of-month days */
+.flatpickr-day.flatpickr-disabled,
+.flatpickr-day.prevMonthDay,
+.flatpickr-day.nextMonthDay {
     color: var(--text-secondary-color);
-    opacity: 0.4;
     cursor: not-allowed;
+    opacity: 0.3;
 }
-.flatpickr-day.disabled:hover,
 .flatpickr-day.flatpickr-disabled:hover {
-    background-color: transparent;
-}
-
-/* Ensure dark theme text colors are applied correctly */
-body.dark-theme .flatpickr-day {
-    color: var(--text-color);
-}
-body.dark-theme .numInput, 
-body.dark-theme .flatpickr-current-month {
-    color: var(--text-color);
+    background: transparent;
 }
 </style>
 
