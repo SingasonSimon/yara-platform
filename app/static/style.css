@@ -869,3 +869,7 @@ input[type="checkbox"].custom-checkbox:checked + .checkbox-label .checkmark { op
     color: var(--text-secondary-color);
     font-style: italic;
 }
+.btn .btn--secondary:active
+{
+    background-color: #d93a79;
+}
