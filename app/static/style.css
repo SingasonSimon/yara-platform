@@ -140,7 +140,7 @@ input:focus, select:focus, textarea:focus {
 }
 .btn--secondary {
     background-color: transparent;
-    color: var(--primary-color);
+    color: white;
     border-color: var(--primary-color);
 }
 .btn--secondary:not(.btn--primary):hover {
